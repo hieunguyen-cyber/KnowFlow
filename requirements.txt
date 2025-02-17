@@ -1,12 +1,2 @@
-torch
-transformers
-fairseq==0.10.2
-torchaudio
-pdfplumber
-python-docx
-markdownify
-duckduckgo_search
-Pillow
-moviepy
-ffmpeg-python
-pymupdf
+fitz
+request
