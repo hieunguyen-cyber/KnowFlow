@@ -1,0 +1,1 @@
+# Load file PDF, DOCX, TXT
