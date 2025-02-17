@@ -4,6 +4,8 @@ pydub
 coqui-tts
 python-docx
 pdfplumber
-sumy
+transformers
+torch
+sentencepiece
 pyvi
 langdetect
