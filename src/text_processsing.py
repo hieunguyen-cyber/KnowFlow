@@ -2,6 +2,14 @@ import os
 import fitz  # PyMuPDF
 from docx import Document
 import google.generativeai as genai
+from dotenv import load_dotenv
+
+# Load biến môi trường từ .env
+load_dotenv()
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+
+# Sử dụng API key mà không hardcode
+genai.configure(api_key=GOOGLE_API_KEY)
 
 def extract_text_from_pdf(pdf_path):
     # Mở file PDF
@@ -102,7 +110,6 @@ def generate_explaination_for_chunks(chunks):
         return []  
 
 if __name__ == "__main__":
-    genai.configure(api_key="AIzaSyBTBmiqMfF5KGFlZQULDtNP9n4GJgI0f6s")
     # Trích xuất văn bản từ file PDF
     text = extract_text_from_file("./data/sample.pdf")
 

@@ -6,3 +6,5 @@ torchaudio
 moviepy
 pysrt
 diffusers
+huggingface_hub
+python-dotenv

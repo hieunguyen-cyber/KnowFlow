@@ -127,9 +127,9 @@ def add_subtitles_to_video(video_path, subtitle_path, output_video_path):
         # Chuyển thời gian thành giây
         start_time = sub.start.ordinal / 1000  # Chuyển từ milliseconds sang giây
         end_time = sub.end.ordinal / 1000
-        font = "./BeVietnamPro-Light.ttf"
+        font = ".data/BeVietnamPro-Light.ttf"
         # Tạo clip phụ đề
-        txt_clip = TextClip(font=font, text=wrap_text(sub.text, max_width=75), font_size=20, stroke_color="black", stroke_width=3, color="#fff")
+        txt_clip = TextClip(font=font, text=wrap_text(sub.text, max_width=85), font_size=30, stroke_color="black", stroke_width=3, color="#fff")
          
         # Đặt vị trí hiển thị (giữa phía dưới video)
         txt_clip = txt_clip.with_position(('center', 'bottom')).with_duration(end_time - start_time).with_start(start_time)
@@ -145,7 +145,7 @@ def add_subtitles_to_video(video_path, subtitle_path, output_video_path):
     print(f"Video với phụ đề đã được lưu tại: {output_video_path}")
 if __name__ == "__main__":
     duration_time = get_audio_duration("./data/audio")
-    create_srt_from_time_and_text(duration_time, './data/text', 'subtitle.srt')
-    concatenate_audio_files("./data/audio","final_audio.wav")
-    create_video_from_images("./data/image","final_audio.wav","output.mp4")
-    add_subtitles_to_video("output.mp4", "subtitle.srt", "final_output.mp4")
+    create_srt_from_time_and_text(duration_time, './data/text', './data/output/subtitle.srt')
+    concatenate_audio_files("./data/audio","./data/output/final_audio.wav")
+    create_video_from_images("./data/image","./data/output/final_audio.wav","./data/output/output.mp4")
+    add_subtitles_to_video("./data/output/output.mp4", "./data/output/subtitle.srt", "./data/output/final_output.mp4")

@@ -2,4 +2,6 @@
 __pycache__/
 *.mp4
 *.wav
-.data/
+.data
+.env
+*.txt
