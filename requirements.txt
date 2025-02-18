@@ -1,2 +1,7 @@
-fitz
-request
+transformers
+pymupdf
+torch
+numpy
+torchaudio
+moviepy
+pysrt
