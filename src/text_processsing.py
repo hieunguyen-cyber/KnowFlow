@@ -104,7 +104,7 @@ def generate_explaination_for_chunks(chunks):
 if __name__ == "__main__":
     genai.configure(api_key="AIzaSyBTBmiqMfF5KGFlZQULDtNP9n4GJgI0f6s")
     # Trích xuất văn bản từ file PDF
-    text = extract_text_from_file("data/sample.pdf")
+    text = extract_text_from_file("./data/sample.pdf")
 
     # Tách văn bản theo ngữ nghĩa
     semantic_chunks = split_text_by_semantics(text)

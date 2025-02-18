@@ -55,40 +55,6 @@ def create_srt_from_time_and_text(duration_time, text_folder, output_srt):
     # Lưu vào file SRT
     with open(output_srt, 'w', encoding='utf-8') as f:
         f.write(subtitle)
-def calculate_end_times_for_groups(audio_folder, json_output_path):
-    group_durations = {}
-    cumulative_durations = {}
-    start_time = 0  # Mốc thời gian bắt đầu của nhóm đầu tiên
-
-    # Duyệt qua các file trong thư mục âm thanh
-    for file in sorted(os.listdir(audio_folder)):
-        if file.endswith('.wav'):
-            # Tách group từ tên file (ví dụ: "1_1.wav" -> group=1, track=1)
-            group, track = file.split('_')[0], file.split('_')[1].split('.')[0]
-            
-            # Lấy thời gian của file âm thanh
-            audio_clip = AudioFileClip(os.path.join(audio_folder, file))
-            duration = audio_clip.duration
-
-            # Thêm thời gian vào nhóm tương ứng
-            if group not in group_durations:
-                group_durations[group] = []
-            group_durations[group].append(duration)
-
-    # Tính tổng thời gian và mốc thời gian kết thúc cho từng nhóm
-    for group, durations in group_durations.items():
-        # Tính tổng thời gian cho nhóm
-        total_duration = sum(durations)
-        
-        # Mốc thời gian kết thúc của nhóm hiện tại
-        end_time = start_time + total_duration
-        cumulative_durations[group] = (start_time, end_time)
-        
-        # Cập nhật start_time cho nhóm tiếp theo
-        start_time = end_time
-    with open(json_output_path, 'w', encoding='utf-8') as json_file:
-        json.dump(cumulative_durations, json_file, ensure_ascii=False, indent=4)
-    return cumulative_durations
 def concatenate_audio_files(audio_folder, output_audio_path):
     # Lọc tất cả các file âm thanh .wav trong thư mục
     audio_clips = []
@@ -112,7 +78,7 @@ def create_video_from_images(image_folder, audio_path, output_video_path):
     total_duration = audio.duration  # Tổng thời lượng video bằng thời lượng audio
 
     # Đọc tất cả các file ảnh trong thư mục và sắp xếp theo tên
-    image_files = [file for file in sorted(os.listdir(image_folder))]
+    image_files = [file for file in sorted(os.listdir(image_folder)) if file.endswith("png")]
     
     if not image_files:
         raise ValueError("Không tìm thấy ảnh nào trong thư mục!")
@@ -163,7 +129,7 @@ def add_subtitles_to_video(video_path, subtitle_path, output_video_path):
         end_time = sub.end.ordinal / 1000
         font = "./BeVietnamPro-Light.ttf"
         # Tạo clip phụ đề
-        txt_clip = TextClip(font=font, text=wrap_text(sub.text, max_width=75), font_size=10, stroke_color="black", stroke_width=3, color="#fff")
+        txt_clip = TextClip(font=font, text=wrap_text(sub.text, max_width=75), font_size=20, stroke_color="black", stroke_width=3, color="#fff")
          
         # Đặt vị trí hiển thị (giữa phía dưới video)
         txt_clip = txt_clip.with_position(('center', 'bottom')).with_duration(end_time - start_time).with_start(start_time)
@@ -180,7 +146,6 @@ def add_subtitles_to_video(video_path, subtitle_path, output_video_path):
 if __name__ == "__main__":
     duration_time = get_audio_duration("./data/audio")
     create_srt_from_time_and_text(duration_time, './data/text', 'subtitle.srt')
-    calculate_end_times_for_groups("./data/audio","image_timestamp.json")
     concatenate_audio_files("./data/audio","final_audio.wav")
     create_video_from_images("./data/image","final_audio.wav","output.mp4")
     add_subtitles_to_video("output.mp4", "subtitle.srt", "final_output.mp4")
