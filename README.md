@@ -27,7 +27,16 @@ cd knowflow
 # Cài đặt các thư viện cần thiết
 pip install -r requirements.txt
 ```
-
+Tạo file `secrets.toml` có cấu trúc như sau:
+```bash
+[secrets]
+HUGGINGFACE_API_KEY = "YOUR_HF_API"
+GOOGLE_API_KEY = "YOUR_GEMINI_API"
+```
+Sau đó di chuyển vào thư mục `.streamlit`:
+```bash
+mv secrets.toml .streamlit/secrets.toml
+```
 ## ▶️ Chạy ứng dụng
 ```bash
 streamlit run app.py
