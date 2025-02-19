@@ -40,7 +40,7 @@ def process_file(uploaded_file):
     return None
 
 # UI chính
-st.title("Upload File và Xem Kết Quả")
+st.title("KnowFlow - Tạo bài giảng từ tài liệu")
 uploaded_file = st.file_uploader("Tải lên file của bạn:", type=["pdf", "docx"])
 
 if uploaded_file is not None:
