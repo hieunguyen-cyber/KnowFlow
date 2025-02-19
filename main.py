@@ -337,9 +337,9 @@ def add_subtitles_to_video(video_path, subtitle_path, output_video_path):
     final_video.write_videofile(output_video_path, fps=video.fps, codec='libx264', threads=4)
 
     print(f"Video với phụ đề đã được lưu tại: {output_video_path}")
-def main():
+def main(file_path):
     # Trích xuất văn bản từ file PDF
-    text = extract_text_from_file("./data/sample.pdf")
+    text = extract_text_from_file(file_path)
 
     # Tách văn bản theo ngữ nghĩa
     semantic_chunks = split_text_by_semantics(text)
@@ -399,4 +399,4 @@ def main():
     create_video_from_images("./data/image","./data/output/final_audio.wav","./data/output/output.mp4")
     add_subtitles_to_video("./data/output/output.mp4", "./data/output/subtitle.srt", "./data/output/final_output.mp4")
 if __name__ == "__main__":
-    main()
+    main("../data/sample.pdf")
