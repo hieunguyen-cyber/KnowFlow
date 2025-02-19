@@ -38,7 +38,7 @@ Sau khi chạy lệnh trên, mở trình duyệt và truy cập `http://localhos
 ![Demo KnowFlow](data/pipeline.png)
 
 ## 📜 Giấy phép
-Dự án được phát hành dưới giấy phép MIT.
+Dự án được phát hành dưới giấy phép Apache.
 
 ---
 _Tác giả: Nguyễn Trung Hiếu_
