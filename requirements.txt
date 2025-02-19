@@ -9,3 +9,4 @@ diffusers
 huggingface_hub
 python-dotenv
 streamlit
+python-docx
