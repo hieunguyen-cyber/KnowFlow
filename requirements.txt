@@ -12,3 +12,5 @@ streamlit
 python-docx
 google-generativeai
 ffmpeg-python
+torchaudio 
+soundfile
