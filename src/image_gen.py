@@ -56,12 +56,12 @@ def describe_image(description):
         str: Một câu tóm tắt rất ngắn về hình ảnh.
     """
     prompt = f"""
-    Bạn là chuyên gia mô tả hình ảnh. Hãy đọc đoạn mô tả dưới đây và rút gọn thành một câu cực ngắn, chỉ giữ lại các yếu tố quan trọng nhất.
+    Bạn là chuyên gia mô tả hình ảnh. Hãy đọc đoạn mô tả dưới đây và rút gọn thành một câu cực ngắn mô tả khung cảnh được đề cập.
 
     Đoạn mô tả:
     {description}
 
-    Hãy trả về đúng một câu ngắn nhất bằng Tiếng Anh có thể nhưng vẫn đầy đủ ý chính.
+    Hãy trả về đúng một câu ngắn nhất có thể bằng Tiếng Anh nhưng vẫn đầy đủ ý chính.
     """
 
     try:
