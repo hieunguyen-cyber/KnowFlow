@@ -1,53 +1,64 @@
 import streamlit as st
+from main import main
 import os
-import main  # Import file main.py
-import google.generativeai as genai
-from huggingface_hub import InferenceClient
 
-# Write your own secrets.toml and run this in terminal: mv secrets.toml .streamlit/secrets.toml
+# Định nghĩa đường dẫn video đầu ra
+OUTPUT_VIDEO_PATH = "./data/output/final_output.mp4"
 
-HF_API_KEY = st.secrets["secrets"]["HUGGINGFACE_API_KEY"]
-GOOGLE_API_KEY = st.secrets["secrets"]["GOOGLE_API_KEY"] 
+# Tiêu đề ứng dụng
+st.set_page_config(page_title="KnowFlow", page_icon="📖")
+st.markdown("<h1 style='text-align: center;'>📖 KnowFlow 🌊</h1>", unsafe_allow_html=True)
+st.markdown("<h4 style='text-align: center;'>Convert documents into videos with AI-powered storytelling</h4>", unsafe_allow_html=True)
 
-# Sử dụng API key mà không hardcode
-genai.configure(api_key=GOOGLE_API_KEY)
-client = InferenceClient(provider="hf-inference", api_key=HF_API_KEY)
+# Thông tin tác giả
+st.markdown("---")
+st.markdown("👨‍💻 **Author:** Nguyễn Trung Hiếu")
+st.markdown("🔗 [GitHub Repository](https://github.com/hieunguyen-cyber/KnowFlow.git)")
+st.markdown("---")
 
-def process_file(uploaded_file):
-    if uploaded_file is not None:
-        # Hiển thị thanh progress
-        progress_bar = st.progress(0)
-        
-        # Lưu file vào thư mục tạm
-        input_path = os.path.join("./data/input", uploaded_file.name)
-        os.makedirs(os.path.dirname(input_path), exist_ok=True)
-        with open(input_path, "wb") as f:
-            f.write(uploaded_file.getbuffer())
-        
-        progress_bar.progress(30)
-        
-        # Gọi hàm main() để xử lý
-        main.main(input_path)
-        
-        progress_bar.progress(70)
-        
-        output_path = "./data/output/final_output.mp4"
-        if os.path.exists(output_path):
-            progress_bar.progress(100)
-            return output_path
+# Upload file PDF
+uploaded_file = st.file_uploader("📂 Upload your document (PDF)", type=["pdf"])
+
+# Nếu có file, lưu vào thư mục tạm và lấy đường dẫn
+file_path = None
+if uploaded_file:
+    file_path = f"./data/input/{uploaded_file.name}"
+    with open(file_path, "wb") as f:
+        f.write(uploaded_file.getbuffer())  # Lưu file thực tế
+
+# Cấu hình đầu vào
+number_of_chunks = st.slider("📜 Number of Chunks", min_value=1, max_value=5, value=3)
+gender = st.radio("🗣️ Select Voice Gender", options=["female", "male"])
+
+# Nếu chọn giọng nam, vô hiệu hóa tốc độ (chỉ cho phép "normal")
+if gender == "male":
+    speed = st.radio("⚡ Speech Speed (Male voice supports only normal)", options=["normal"], disabled=True)
+else:
+    speed = st.radio("⚡ Speech Speed", options=["fast", "normal", "slow"])
+
+detail_level = st.radio("📖 Detail Level", options=["short", "detailed"])
+perspective = st.radio("🔎 Perspective", options=["subjective", "neutral"])
+emotion = st.text_input("🎭 Emotion", placeholder="Example: mysterious, romantic,...")
+time_setting = st.text_input("⏳ Time Setting", placeholder="Example: modern, medieval,...")
+art_style = st.text_input("🎨 Art Style", placeholder="Example: realistic, abstract,...")
+style = st.text_input("🖌️ Style", placeholder="Example: realistic, anime,...")
+color_palette = st.text_input("🌈 Color Palette", placeholder="Example: vibrant, monochrome,...")
+
+# Nút chạy pipeline
+if st.button("🚀 Generate Video"):
+    if file_path and os.path.exists(file_path):
+        st.success("⏳ Processing started...")
+        main(file_path, number_of_chunks, gender, speed, detail_level, perspective, emotion, time_setting, art_style, style, color_palette)
+
+        # Kiểm tra xem video đã được tạo chưa
+        if os.path.exists(OUTPUT_VIDEO_PATH):
+            st.success("🎉 Video generated successfully!")
+            st.video(OUTPUT_VIDEO_PATH)  # Trình chiếu video
+
+            # Tạo link tải về
+            with open(OUTPUT_VIDEO_PATH, "rb") as video_file:
+                st.download_button(label="📥 Download Video", data=video_file, file_name="final_output.mp4", mime="video/mp4")
         else:
-            st.error("Lỗi: Không tìm thấy video đầu ra!")
-    return None
-
-# UI chính
-st.title("KnowFlow - Tạo bài giảng từ tài liệu")
-uploaded_file = st.file_uploader("Tải lên file của bạn:", type=["pdf", "docx"])
-
-if uploaded_file is not None:
-    st.write("### File đã tải lên:", uploaded_file.name)
-    output_path = process_file(uploaded_file)
-    
-    if output_path:
-        st.video(output_path)
-        with open(output_path, "rb") as file:
-            st.download_button(label="Tải video xuống", data=file, file_name="./data/output/final_output.mp4", mime="video/mp4")
+            st.error("⚠️ Video generation failed. Please check the logs.")
+    else:
+        st.error("⚠️ Please upload a valid PDF file.")

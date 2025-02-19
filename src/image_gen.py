@@ -45,23 +45,34 @@ def merge_grouped_texts(folder_path):
         merged_texts.append(merged_content)
     
     return merged_texts
-def describe_image(description):
+def describe_image(description, detail_level="short", perspective="neutral", emotion=None, time_setting=None, art_style=None):
     """
-    Nhận một đoạn văn mô tả chi tiết và trả về một câu mô tả cực ngắn gọn, chỉ nêu các yếu tố chính của hình ảnh.
+    Nhận một đoạn văn mô tả chi tiết và trả về một câu mô tả hình ảnh theo các tùy chỉnh.
 
     Args:
         description (str): Đoạn văn mô tả chi tiết.
+        detail_level (str): Mức độ chi tiết ("short" hoặc "detailed").
+        perspective (str): Góc nhìn ("subjective" hoặc "neutral").
+        emotion (str, optional): Cảm xúc chủ đạo (nếu có, ví dụ: "mysterious", "romantic").
+        time_setting (str, optional): Bối cảnh thời gian (ví dụ: "modern", "medieval", "futuristic").
+        art_style (str, optional): Phong cách nghệ thuật (ví dụ: "realistic", "abstract", "sketch").
 
     Returns:
-        str: Một câu tóm tắt rất ngắn về hình ảnh.
+        str: Một câu mô tả hình ảnh theo yêu cầu.
     """
+    
     prompt = f"""
-    Bạn là chuyên gia mô tả hình ảnh. Hãy đọc đoạn mô tả dưới đây và rút gọn thành một câu cực ngắn mô tả khung cảnh được đề cập.
+    Bạn là chuyên gia mô tả hình ảnh. Hãy đọc đoạn mô tả dưới đây và tạo một mô tả hình ảnh theo các tiêu chí sau:
+    - Mức độ chi tiết: {"Ngắn gọn" if detail_level == "short" else "Chi tiết"}.
+    - Góc nhìn: {"Chủ quan" if perspective == "subjective" else "Trung lập"}.
+    {f"- Cảm xúc chủ đạo: {emotion}." if emotion else ""}
+    {f"- Bối cảnh thời gian: {time_setting}." if time_setting else ""}
+    {f"- Phong cách nghệ thuật: {art_style}." if art_style else ""}
 
     Đoạn mô tả:
     {description}
 
-    Hãy trả về đúng một câu ngắn nhất có thể bằng Tiếng Anh nhưng vẫn đầy đủ ý chính.
+    Hãy tạo một mô tả hình ảnh phù hợp với yêu cầu trên bằng Tiếng Anh.
     """
 
     try:
@@ -71,25 +82,42 @@ def describe_image(description):
     except Exception as e:
         print(f"Lỗi khi gọi API Gemini: {e}")
         return ""
-def generate_image(prompt, output_path):
-    image = client.text_to_image(prompt,model="stabilityai/stable-diffusion-3.5-large")
+def generate_image(prompt, output_path, model="stabilityai/stable-diffusion-3.5-large", style=None, color_palette=None):
+    """
+    Tạo hình ảnh từ mô tả văn bản với các tùy chỉnh linh hoạt.
+    
+    :param prompt: Mô tả hình ảnh đầu vào.
+    :param output_path: Đường dẫn lưu ảnh đầu ra.
+    :param model: Mô hình AI sử dụng để tạo ảnh.
+    :param style: Phong cách hình ảnh (nếu có, ví dụ: 'realistic', 'anime', 'cyberpunk').
+    :param color_palette: Bảng màu ưu tiên (nếu có, ví dụ: 'vibrant', 'monochrome').
+    """
+    
+    custom_prompt = prompt
+    
+    if style:
+        custom_prompt += f" in {style} style"
+    if color_palette:
+        custom_prompt += f" with {color_palette} color scheme"
+    
+    image = client.text_to_image(custom_prompt, model=model)
     image.save(output_path)
-if __name__ == "__main__":
+def image_gen(detail_level="short", perspective="neutral", emotion=None, time_setting=None, art_style=None, resolution=(512, 512), style=None, color_palette=None):
     text_folder = "./data/text"
     merged_texts = merge_grouped_texts(text_folder)
     index = 0
     for merged_text in tqdm(merged_texts, desc="Processing", unit="image"):
         output_path = f"./data/image/{index}.png"
-        prompt = describe_image(merged_text)
+        prompt = describe_image(merged_text, detail_level=detail_level, perspective=perspective, emotion=emotion, time_setting=time_setting, art_style=art_style)
         print(prompt)
-
+        print(f"Image saved at {output_path}")
         # Cơ chế retry với backoff
         max_retries = 5
         retry_count = 0
 
         while retry_count < max_retries:
             try:
-                generate_image(prompt, output_path)
+                generate_image(prompt, output_path, style=style, color_palette=color_palette)
                 time.sleep(60)  # Chờ sau khi tạo ảnh thành công
                 break  # Nếu thành công thì thoát khỏi vòng lặp retry
             except HfHubHTTPError as e:
@@ -100,3 +128,5 @@ if __name__ == "__main__":
                 time.sleep(wait_time)
 
         index += 1
+if __name__ == "__main__":
+    image_gen(detail_level="short", perspective="neutral", emotion="sad", time_setting="classic", art_style="realistic", style="anime", color_palette="monochrome")
