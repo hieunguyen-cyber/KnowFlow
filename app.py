@@ -17,7 +17,7 @@ st.markdown("🔗 [GitHub Repository](https://github.com/hieunguyen-cyber/KnowFl
 st.markdown("---")
 
 # Upload file PDF
-uploaded_file = st.file_uploader("📂 Upload your document (PDF)", type=["pdf"])
+uploaded_file = st.file_uploader("📂 Upload your document (PDF)", type=["pdf","docx"])
 
 # Nếu có file, lưu vào thư mục tạm và lấy đường dẫn
 file_path = None
