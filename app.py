@@ -40,8 +40,8 @@ detail_level = st.radio("📖 Detail Level", options=["short", "detailed"])
 perspective = st.radio("🔎 Perspective", options=["subjective", "neutral"])
 emotion = st.text_input("🎭 Emotion", placeholder="Example: mysterious, romantic,...")
 time_setting = st.text_input("⏳ Time Setting", placeholder="Example: modern, medieval,...")
-art_style = st.text_input("🎨 Art Style", placeholder="Example: realistic, abstract,...")
-style = st.text_input("🖌️ Style", placeholder="Example: realistic, anime,...")
+art_style = st.text_input("🖌️ Description Style", placeholder="Example: realistic, abstract,...")
+style = st.text_input("🎨 Image Style", placeholder="Example: realistic, anime,...")
 color_palette = st.text_input("🌈 Color Palette", placeholder="Example: vibrant, monochrome,...")
 
 # Nút chạy pipeline
