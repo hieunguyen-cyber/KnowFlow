@@ -15,36 +15,30 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 genai.configure(api_key=GOOGLE_API_KEY)
 client = InferenceClient(provider="hf-inference", api_key=HF_API_KEY)
 
-def merge_grouped_texts(folder_path):
-    """
-    Nhóm các file theo {group}_{number}.txt, sau đó tổng hợp nội dung từng nhóm.
-    
-    Args:
-        folder_path (str): Đường dẫn tới thư mục chứa các file .txt
-    
-    Returns:
-        list: Danh sách các văn bản tổng hợp của từng nhóm
-    """
-    files = glob.glob(os.path.join(folder_path, "*.txt"))
-    grouped_files = defaultdict(list)
-    
-    # Nhóm file theo group và sắp xếp theo số thứ tự
-    for file in files:
-        filename = os.path.basename(file)
-        parts = filename.rsplit("_", 1)
-        if len(parts) == 2 and parts[1].endswith(".txt"):
-            group, number = parts[0], parts[1][:-4]  # Loại bỏ đuôi .txt
-            if number.isdigit():
-                grouped_files[group].append((int(number), file))
-    
-    # Đọc và ghép nội dung từng nhóm
-    merged_texts = []
-    for group in sorted(grouped_files.keys()):
-        grouped_files[group].sort()  # Sắp xếp theo số thứ tự
-        merged_content = "\n".join(open(file, encoding="utf-8").read() for _, file in grouped_files[group])
-        merged_texts.append(merged_content)
-    
-    return merged_texts
+def split_text_for_images(number_of_images):
+    with open("./data/text/text.txt", "r", encoding="utf-8") as file:
+        text = file.read().strip()
+
+    total_length = len(text)
+    chunk_size = total_length // number_of_images  # Độ dài trung bình của mỗi đoạn
+
+    chunks = []
+    start = 0
+
+    for i in range(number_of_images):
+        # Xác định điểm kết thúc gần nhất tại dấu câu (nếu có)
+        end = start + chunk_size
+        if i < number_of_images - 1:
+            while end < total_length and text[end] not in ".!?":  
+                end += 1  # Mở rộng đến dấu câu gần nhất để tránh cắt ngang câu
+            if end < total_length - 1:
+                end += 1  # Bao gồm cả dấu câu vào đoạn
+
+        chunk = text[start:end].strip()
+        chunks.append(chunk)
+        start = end  # Bắt đầu đoạn tiếp theo từ đây
+
+    return chunks
 def describe_image(description, detail_level="short", perspective="neutral", emotion=None, time_setting=None, art_style=None):
     """
     Nhận một đoạn văn mô tả chi tiết và trả về một câu mô tả hình ảnh theo các tùy chỉnh.
@@ -82,7 +76,8 @@ def describe_image(description, detail_level="short", perspective="neutral", emo
     except Exception as e:
         print(f"Lỗi khi gọi API Gemini: {e}")
         return ""
-def generate_image(prompt, output_path, model="stabilityai/stable-diffusion-3.5-large", style=None, color_palette=None):
+def generate_image(prompt, output_path, style=None, color_palette=None):
+    model="stabilityai/stable-diffusion-3.5-large"
     """
     Tạo hình ảnh từ mô tả văn bản với các tùy chỉnh linh hoạt.
     
@@ -92,7 +87,6 @@ def generate_image(prompt, output_path, model="stabilityai/stable-diffusion-3.5-
     :param style: Phong cách hình ảnh (nếu có, ví dụ: 'realistic', 'anime', 'cyberpunk').
     :param color_palette: Bảng màu ưu tiên (nếu có, ví dụ: 'vibrant', 'monochrome').
     """
-    
     custom_prompt = prompt
     
     if style:
@@ -102,22 +96,21 @@ def generate_image(prompt, output_path, model="stabilityai/stable-diffusion-3.5-
     
     image = client.text_to_image(custom_prompt, model=model)
     image.save(output_path)
-def image_gen(detail_level="short", perspective="neutral", emotion=None, time_setting=None, art_style=None, style=None, color_palette=None):
-    text_folder = "./data/text"
-    merged_texts = merge_grouped_texts(text_folder)
+def image_gen(number_of_images = 3,detail_level = "short", perspective="neutral", emotion=None, time_setting=None, art_style=None, style=None, color_palette=None):
+    texts = split_text_for_images(number_of_images)
     index = 0
-    for merged_text in tqdm(merged_texts, desc="Processing", unit="image"):
+    for text in tqdm(texts, desc="Processing", unit="image"):
         output_path = f"./data/image/{index}.png"
-        prompt = describe_image(merged_text, detail_level=detail_level, perspective=perspective, emotion=emotion, time_setting=time_setting, art_style=art_style)
+        prompt = describe_image(text, detail_level, perspective, emotion, time_setting, art_style)
         print(prompt)
-        print(f"Image saved at {output_path}")
+
         # Cơ chế retry với backoff
         max_retries = 5
         retry_count = 0
 
         while retry_count < max_retries:
             try:
-                generate_image(prompt, output_path, style=style, color_palette=color_palette)
+                generate_image(prompt, output_path, style, color_palette)
                 time.sleep(60)  # Chờ sau khi tạo ảnh thành công
                 break  # Nếu thành công thì thoát khỏi vòng lặp retry
             except HfHubHTTPError as e:
@@ -126,7 +119,7 @@ def image_gen(detail_level="short", perspective="neutral", emotion=None, time_se
                 wait_time = 2 ** retry_count + random.uniform(0, 1)  # Exponential backoff
                 print(f"Thử lại sau {wait_time:.2f} giây...")
                 time.sleep(wait_time)
-
         index += 1
+    os.remove("./data/text/text.txt")
 if __name__ == "__main__":
-    image_gen(detail_level="short", perspective="neutral", emotion="sad", time_setting="classic", art_style="realistic", style="anime", color_palette="monochrome")
+    image_gen(number_of_images = 3, detail_level="short", perspective="neutral", emotion="sad", time_setting="classic", art_style="realistic", style="anime", color_palette="monochrome")

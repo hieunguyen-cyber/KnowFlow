@@ -25,7 +25,7 @@ if uploaded_file:
     file_path = f"./data/input/{uploaded_file.name}"
     with open(file_path, "wb") as f:
         f.write(uploaded_file.getbuffer())  # Lưu file thực tế
-
+number_of_images = st.slider("🖼️ Nhập số ảnh",1,10,3)
 # Cấu hình đầu vào
 gender = st.radio("🗣️ Select Voice Gender", options=["female", "male"])
 
@@ -59,7 +59,7 @@ color_palette = st.text_input("🌈 Color Palette", placeholder="Example: vibran
 if st.button("🚀 Generate Video"):
     if file_path and os.path.exists(file_path):
         st.success("⏳ Processing started...")
-        main(file_path, analysis_level, writting_style, word_lower_limit, word_upper_limit, gender, speed, detail_level, perspective, emotion, time_setting, art_style, style, color_palette)
+        main(file_path, analysis_level, writting_style, word_lower_limit, word_upper_limit, gender, speed, number_of_images, detail_level, perspective, emotion, time_setting, art_style, style, color_palette)
 
         # Kiểm tra xem video đã được tạo chưa
         if os.path.exists(OUTPUT_VIDEO_PATH):

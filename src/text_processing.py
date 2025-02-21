@@ -122,7 +122,8 @@ def generate_explaination_for_chunks(chunks, analysis_level='basic', writting_st
 def text_processing(file_path, analysis_level='basic', writting_style='academic', word_lower_limit = 100, word_upper_limit = 150):
     # Trích xuất văn bản từ file PDF
     text = extract_text_from_file(file_path=file_path)
-
+    with open("./data/text/text.txt", "w", encoding="utf-8") as f:
+        f.write(text)  
     # Tách văn bản theo ngữ nghĩa
     semantic_chunks = split_text_by_semantics(text)
 
@@ -143,8 +144,8 @@ def text_processing(file_path, analysis_level='basic', writting_style='academic'
             if sentence:  # Kiểm tra nếu câu không rỗng
                 output_file = os.path.join(output_dir, f"{chunk_idx}_{sentence_idx}.txt")  # Tên file dạng "chunkID_sentenceID.txt"
                 with open(output_file, "w", encoding="utf-8") as f:
-                    f.write(sentence + ".")  # Giữ dấu chấm cuối câu
+                    f.write(sentence.replace("*","") + ".")  # Giữ dấu chấm cuối câu
                 print(f"Đã lưu: {output_file}")
 ####################### - MAIN CODE - #######################
 if __name__ == "__main__":
-    text_processing(file_path = "./data/input/sample_3.pdf",number_of_chunks=3)
+    text_processing(file_path = "./data/input/sample_3.pdf")
