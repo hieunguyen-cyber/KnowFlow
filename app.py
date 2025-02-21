@@ -27,7 +27,6 @@ if uploaded_file:
         f.write(uploaded_file.getbuffer())  # Lưu file thực tế
 
 # Cấu hình đầu vào
-number_of_chunks = st.slider("📜 Number of Chunks", min_value=1, max_value=5, value=3)
 gender = st.radio("🗣️ Select Voice Gender", options=["female", "male"])
 
 # Nếu chọn giọng nam, vô hiệu hóa tốc độ (chỉ cho phép "normal")
@@ -35,12 +34,24 @@ if gender == "male":
     speed = st.radio("⚡ Speech Speed (Male voice supports only normal)", options=["normal"], disabled=True)
 else:
     speed = st.radio("⚡ Speech Speed", options=["fast", "normal", "slow"])
+analysis_level = st.radio("Analysis Level", options=["basic", "detailed"])
+writting_style = st.radio("Writting Style", options  = ["academic","popular","creative","humorous"])
 
-detail_level = st.radio("📖 Detail Level", options=["short", "detailed"])
+# Tạo thanh trượt với giá trị từ 50 đến 250, bước nhảy 50
+word_lower_limit, word_upper_limit = st.slider(
+    "Chọn khoảng độ dài văn bản:",
+    min_value=50,
+    max_value=250,
+    value=(50, 250),  # Giá trị mặc định
+    step=50
+)
+
+st.write(f"Giới hạn độ dài văn bản từ **{word_lower_limit}** đến **{word_upper_limit}** ký tự.")
+detail_level = st.radio("📖 Detail Level of Image Description", options=["short", "detailed"])
 perspective = st.radio("🔎 Perspective", options=["subjective", "neutral"])
 emotion = st.text_input("🎭 Emotion", placeholder="Example: mysterious, romantic,...")
 time_setting = st.text_input("⏳ Time Setting", placeholder="Example: modern, medieval,...")
-art_style = st.text_input("🖌️ Description Style", placeholder="Example: realistic, abstract,...")
+art_style = st.text_input("🖌️ Image Description Style", placeholder="Example: realistic, abstract,...")
 style = st.text_input("🎨 Image Style", placeholder="Example: realistic, anime,...")
 color_palette = st.text_input("🌈 Color Palette", placeholder="Example: vibrant, monochrome,...")
 
@@ -48,7 +59,7 @@ color_palette = st.text_input("🌈 Color Palette", placeholder="Example: vibran
 if st.button("🚀 Generate Video"):
     if file_path and os.path.exists(file_path):
         st.success("⏳ Processing started...")
-        main(file_path, number_of_chunks, gender, speed, detail_level, perspective, emotion, time_setting, art_style, style, color_palette)
+        main(file_path, analysis_level, writting_style, word_lower_limit, word_upper_limit, gender, speed, detail_level, perspective, emotion, time_setting, art_style, style, color_palette)
 
         # Kiểm tra xem video đã được tạo chưa
         if os.path.exists(OUTPUT_VIDEO_PATH):
@@ -57,7 +68,7 @@ if st.button("🚀 Generate Video"):
 
             # Tạo link tải về
             with open(OUTPUT_VIDEO_PATH, "rb") as video_file:
-                st.download_button(label="📥 Download Video", data=video_file, file_name="final_output.mp4", mime="video/mp4")
+                st.download_button(label="📥 Download Video", data=video_file, file_name="./data/output/final_output.mp4", mime="video/mp4")
         else:
             st.error("⚠️ Video generation failed. Please check the logs.")
     else:

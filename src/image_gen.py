@@ -102,7 +102,7 @@ def generate_image(prompt, output_path, model="stabilityai/stable-diffusion-3.5-
     
     image = client.text_to_image(custom_prompt, model=model)
     image.save(output_path)
-def image_gen(detail_level="short", perspective="neutral", emotion=None, time_setting=None, art_style=None, resolution=(512, 512), style=None, color_palette=None):
+def image_gen(detail_level="short", perspective="neutral", emotion=None, time_setting=None, art_style=None, style=None, color_palette=None):
     text_folder = "./data/text"
     merged_texts = merge_grouped_texts(text_folder)
     index = 0

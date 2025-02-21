@@ -37,9 +37,9 @@ def extract_text_from_file(file_path):
     else:
         raise ValueError("Unsupported file format. Only PDF and DOCX are supported.")
 ####################### - SEMANTIC CHUNKING - #######################
-def split_text_by_semantics(text, number_of_chunks):
+def split_text_by_semantics(text):
     prompt = f"""
-    Bạn là một chuyên gia xử lý văn bản. Hãy chia văn bản sau thành {number_of_chunks} đoạn có ý nghĩa sao cho mỗi đoạn vừa đủ để giải thích trong khoảng 3 đến 5 câu.
+    Bạn là một chuyên gia xử lý văn bản. Hãy chia văn bản sau thành một số đoạn có ý nghĩa sao cho mỗi đoạn vừa đủ để giải thích trong khoảng 3 đến 5 câu.
 
     Văn bản:
     {text}
@@ -63,14 +63,14 @@ def split_text_by_semantics(text, number_of_chunks):
         return []
 
 ####################### - CONTENT GENERATION - #######################
-def generate_explaination_for_chunks(chunks, analysis_level='basic', style='academic', word_limit=100):
+def generate_explaination_for_chunks(chunks, analysis_level='basic', writting_style='academic', word_lower_limit=100, word_upper_limit=150):
     """
     Phân tích nội dung của văn bản theo mức độ và phong cách mong muốn.
     
     :param chunks: Danh sách các đoạn văn bản cần phân tích.
     :param text: Toàn bộ văn bản gốc.
     :param analysis_level: Mức độ phân tích ('basic' hoặc 'detailed').
-    :param style: Phong cách phân tích ('academic', 'popular', 'creative', 'humorous').
+    :param writting_style: Phong cách phân tích ('academic', 'popular', 'creative', 'humorous').
     :param word_limit: Số từ ước lượng cho mỗi phần tóm tắt.
     :return: Danh sách các phân tích tương ứng với từng đoạn.
     """
@@ -80,7 +80,7 @@ def generate_explaination_for_chunks(chunks, analysis_level='basic', style='acad
         'detailed': "Hãy phân tích chuyên sâu từng phần, làm rõ ý nghĩa, ngữ cảnh và các yếu tố quan trọng."
     }
     
-    style_prompts = {
+    writting_style_prompts = {
         'academic': "Phân tích theo phong cách học thuật, sử dụng ngôn ngữ chuyên sâu và lập luận chặt chẽ.",
         'popular': "Trình bày theo phong cách phổ thông, dễ hiểu và phù hợp với nhiều đối tượng.",
         'creative': "Giải thích một cách sáng tạo, sử dụng hình ảnh ẩn dụ và cách diễn đạt thú vị.",
@@ -88,11 +88,11 @@ def generate_explaination_for_chunks(chunks, analysis_level='basic', style='acad
     }
     
     overview_prompt = f"""
-    Đây là một văn bản có nội dung quan trọng. Bạn sẽ phân tích từng phần theo mức độ '{analysis_level}' và phong cách '{style}'.
+    Đây là một văn bản có nội dung quan trọng. Bạn sẽ phân tích từng phần theo mức độ '{analysis_level}' và phong cách '{writting_style}'.
     Văn bản gồm các phần sau: {', '.join([f'Phần {i+1}' for i in range(len(chunks))])}.
     {level_prompts[analysis_level]}
-    {style_prompts[style]}
-    Mỗi phần không vượt quá {word_limit} từ.
+    {writting_style_prompts[writting_style]}
+    Mỗi phần không vượt quá {word_upper_limit} từ và không ít hơn {word_lower_limit} từ.
     """
     
     try:
@@ -105,10 +105,10 @@ def generate_explaination_for_chunks(chunks, analysis_level='basic', style='acad
             part_prompt = f"""
             Phân tích phần {idx} của văn bản.
             {level_prompts[analysis_level]}
-            {style_prompts[style]}
+            {writting_style_prompts[writting_style]}
             Nội dung phần này:
             {chunk}
-            Hãy đảm bảo phần tóm tắt không vượt quá {word_limit} từ.
+            Hãy đảm bảo phần tóm tắt không vượt quá {word_upper_limit} từ và không ít hơn {word_lower_limit}.
             """
             
             part_response = model.generate_content(part_prompt)
@@ -119,15 +119,15 @@ def generate_explaination_for_chunks(chunks, analysis_level='basic', style='acad
     except Exception as e:
         print(f"Lỗi khi gọi API Gemini: {e}")
         return [] 
-def text_processing(file_path, number_of_chunks=3, analysis_level='basic', style='academic', word_limit=100):
+def text_processing(file_path, analysis_level='basic', writting_style='academic', word_lower_limit = 100, word_upper_limit = 150):
     # Trích xuất văn bản từ file PDF
     text = extract_text_from_file(file_path=file_path)
 
     # Tách văn bản theo ngữ nghĩa
-    semantic_chunks = split_text_by_semantics(text, number_of_chunks=number_of_chunks)
+    semantic_chunks = split_text_by_semantics(text)
 
     # Tạo thuyết minh cho từng phần semantic chunk
-    explanations = generate_explaination_for_chunks(semantic_chunks, analysis_level=analysis_level, style=style, word_limit=word_limit)
+    explanations = generate_explaination_for_chunks(semantic_chunks, analysis_level=analysis_level, writting_style = writting_style, word_lower_limit = word_lower_limit, word_upper_limit=word_upper_limit)
 
     # Tạo thư mục nếu chưa tồn tại
     output_dir = "./data/text/"
@@ -147,4 +147,4 @@ def text_processing(file_path, number_of_chunks=3, analysis_level='basic', style
                 print(f"Đã lưu: {output_file}")
 ####################### - MAIN CODE - #######################
 if __name__ == "__main__":
-    text_processing(file_path = "./data/input/sample.pdf",number_of_chunks=3)
+    text_processing(file_path = "./data/input/sample_3.pdf",number_of_chunks=3)
