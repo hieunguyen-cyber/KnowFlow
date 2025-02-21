@@ -119,28 +119,31 @@ def generate_explaination_for_chunks(chunks, analysis_level='basic', style='acad
     except Exception as e:
         print(f"Lỗi khi gọi API Gemini: {e}")
         return [] 
-def text_processing(file_path, number_of_chunks = 3, analysis_level='basic', style='academic', word_limit=100):
+def text_processing(file_path, number_of_chunks=3, analysis_level='basic', style='academic', word_limit=100):
     # Trích xuất văn bản từ file PDF
-    text = extract_text_from_file(file_path = file_path)
+    text = extract_text_from_file(file_path=file_path)
 
     # Tách văn bản theo ngữ nghĩa
-    semantic_chunks = split_text_by_semantics(text,number_of_chunks = number_of_chunks)
+    semantic_chunks = split_text_by_semantics(text, number_of_chunks=number_of_chunks)
 
     # Tạo thuyết minh cho từng phần semantic chunk
-    explainations = generate_explaination_for_chunks(semantic_chunks, analysis_level = analysis_level, style = style, word_limit = word_limit)
+    explanations = generate_explaination_for_chunks(semantic_chunks, analysis_level=analysis_level, style=style, word_limit=word_limit)
 
-    # Lưu từng câu vào tệp riêng biệt
-    for idx, explaination in enumerate(explainations, start=1):
-        # Tách đoạn văn bản thành các câu dựa trên dấu chấm
-        sentences = explaination.split('.')
-        
-        # Lưu từng câu vào tệp riêng biệt
+    # Tạo thư mục nếu chưa tồn tại
+    output_dir = "./data/text/"
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Lưu từng câu vào file riêng biệt
+    for chunk_idx, explanation in enumerate(explanations, start=1):
+        # Tách đoạn phân tích thành các câu
+        sentences = explanation.split('.')
+
         for sentence_idx, sentence in enumerate(sentences, start=1):
             sentence = sentence.strip()  # Loại bỏ khoảng trắng thừa
             if sentence:  # Kiểm tra nếu câu không rỗng
-                output_file = f"./data/text/{idx}_{sentence_idx}.txt"  # Tên tệp theo định dạng x_y.txt
+                output_file = os.path.join(output_dir, f"{chunk_idx}_{sentence_idx}.txt")  # Tên file dạng "chunkID_sentenceID.txt"
                 with open(output_file, "w", encoding="utf-8") as f:
-                    f.write(f"'{sentence}'")  # Ghi câu trong dấu nháy đơn
+                    f.write(sentence + ".")  # Giữ dấu chấm cuối câu
                 print(f"Đã lưu: {output_file}")
 ####################### - MAIN CODE - #######################
 if __name__ == "__main__":
