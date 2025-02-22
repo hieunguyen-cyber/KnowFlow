@@ -1,9 +1,11 @@
 import streamlit as st
 from main import main
 import os
+import subprocess
 
 # Định nghĩa đường dẫn video đầu ra
 OUTPUT_VIDEO_PATH = "./data/output/final_output.mp4"
+OUTPUT_VIDEO_FIXED_PATH = "./data/output/final_output_fixed.mp4"
 
 # Tiêu đề ứng dụng
 st.set_page_config(page_title="KnowFlow", page_icon="📖")
@@ -55,6 +57,15 @@ art_style = st.text_input("🖌️ Image Description Style", placeholder="Exampl
 style = st.text_input("🎨 Image Style", placeholder="Example: realistic, anime,...")
 color_palette = st.text_input("🌈 Color Palette", placeholder="Example: vibrant, monochrome,...")
 
+def convert_audio_format(video_input, video_output):
+    """ Chuyển đổi định dạng âm thanh của video sang AAC """
+    command = [
+        "ffmpeg", "-i", video_input,
+        "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+        video_output
+    ]
+    subprocess.run(command, check=True)
+
 # Nút chạy pipeline
 if st.button("🚀 Generate Video"):
     if file_path and os.path.exists(file_path):
@@ -64,11 +75,15 @@ if st.button("🚀 Generate Video"):
         # Kiểm tra xem video đã được tạo chưa
         if os.path.exists(OUTPUT_VIDEO_PATH):
             st.success("🎉 Video generated successfully!")
-            st.video(OUTPUT_VIDEO_PATH)  # Trình chiếu video
+            
+            # Chuyển đổi định dạng âm thanh
+            convert_audio_format(OUTPUT_VIDEO_PATH, OUTPUT_VIDEO_FIXED_PATH)
+
+            st.video(OUTPUT_VIDEO_FIXED_PATH)  # Trình chiếu video
 
             # Tạo link tải về
-            with open(OUTPUT_VIDEO_PATH, "rb") as video_file:
-                st.download_button(label="📥 Download Video", data=video_file, file_name="./data/output/final_output.mp4", mime="video/mp4")
+            with open(OUTPUT_VIDEO_FIXED_PATH, "rb") as video_file:
+                st.download_button(label="📥 Download Video", data=video_file, file_name="final_output_fixed.mp4", mime="video/mp4")
         else:
             st.error("⚠️ Video generation failed. Please check the logs.")
     else:
