@@ -14,13 +14,11 @@ def main(file_path = "./data/input/sample.pdf", analysis_level='basic', writting
     remove_cache("./data/audio")
     remove_cache("./data/image")
     remove_cache("./data/text")
+    remove_cache("./data/output")
     text_processing(file_path = file_path, analysis_level=analysis_level, writting_style=writting_style, word_lower_limit = word_lower_limit, word_upper_limit=word_upper_limit )
     text_to_speech(gender = gender, speed = speed)
     image_gen(number_of_images = number_of_images, detail_level=detail_level, perspective=perspective, emotion=emotion, time_setting=time_setting, art_style=art_style, style=style, color_palette=color_palette)
     text_to_video()
-    remove_cache("./data/audio")
-    remove_cache("./data/image")
-    remove_cache("./data/text")
 
 if __name__ == "__main__":
-    main(file_path="./data/input/sample_1.pdf")
+    main(file_path="./data/input/sample_2.pdf")

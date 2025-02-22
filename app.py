@@ -58,13 +58,22 @@ style = st.text_input("🎨 Image Style", placeholder="Example: realistic, anime
 color_palette = st.text_input("🌈 Color Palette", placeholder="Example: vibrant, monochrome,...")
 
 def convert_audio_format(video_input, video_output):
-    """ Chuyển đổi định dạng âm thanh của video sang AAC """
+    """Chuyển đổi định dạng âm thanh của video sang AAC."""
+    if not os.path.exists(video_input):
+        raise FileNotFoundError(f"File '{video_input}' không tồn tại!")
+
     command = [
-        "ffmpeg", "-i", video_input,
+        "ffmpeg", "-i", video_input,  
         "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+        "-y",  # Ghi đè nếu file output đã tồn tại
         video_output
     ]
-    subprocess.run(command, check=True)
+    
+    try:
+        subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print(f"✅ Chuyển đổi thành công: {video_output}")
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Lỗi khi chuyển đổi video: {e.stderr.decode()}")
 
 # Nút chạy pipeline
 if st.button("🚀 Generate Video"):
