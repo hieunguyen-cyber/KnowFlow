@@ -1,16 +1,24 @@
 transformers
 pymupdf
 torch==2.2.0
-torchaudio
-moviepy
+torchaudio==2.2.0
+moviepy==1.0.3
 pysrt
 huggingface_hub
 python-dotenv
-streamlit
+streamlit==1.42.2
 python-docx
 google-generativeai
-ffmpeg-python
-torchaudio 
+ffmpeg-python==0.2.0
 soundfile
 gtts
-numpy<2
+numpy==1.26.4
+
+# Additional dependencies for stability
+watchdog==3.0.0  # Prevents Streamlit's auto-reload issues
+imageio==2.31.5
+imageio-ffmpeg==0.5.1
+pandas==2.2.3
+scipy==1.12.0
+protobuf==5.29.3
+pydub==0.25.1
