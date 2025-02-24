@@ -12,8 +12,6 @@ import subprocess
 from huggingface_hub import InferenceClient
 import google.generativeai as genai
 
-st.write("🔑 API Key:", st.secrets["secrets"]["HF_TOKEN"])
-
 HF_TOKEN = st.secrets["secrets"]["HF_TOKEN"]
 GOOGLE_API_KEY = st.secrets["secrets"]["GOOGLE_API_KEY"]
 genai.configure(api_key=GOOGLE_API_KEY)
@@ -25,6 +23,7 @@ OUTPUT_VIDEO_FIXED_PATH = "./data/output/final_output_fixed.mp4"
 
 # Tiêu đề ứng dụng
 st.set_page_config(page_title="KnowFlow", page_icon="📖")
+st.write("🔑 API Key:", st.secrets["secrets"]["HF_TOKEN"])
 st.markdown("<h1 style='text-align: center;'>📖 KnowFlow 🌊</h1>", unsafe_allow_html=True)
 st.markdown("<h4 style='text-align: center;'>Convert documents into videos with AI-powered storytelling</h4>", unsafe_allow_html=True)
 
