@@ -1,7 +1,6 @@
 import torch
 from transformers import VitsModel, AutoTokenizer
 import torchaudio
-import numpy as np
 import os
 from gtts import gTTS
 
