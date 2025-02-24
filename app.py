@@ -1,3 +1,10 @@
+import asyncio
+
+try:
+    asyncio.get_running_loop()
+except RuntimeError:
+    asyncio.run(asyncio.sleep(0))  # Ensures an event loop is created before Streamlit starts
+
 import streamlit as st
 from main import main
 import os
