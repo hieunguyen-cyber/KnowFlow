@@ -2,7 +2,7 @@ transformers
 pymupdf
 torch==2.2.0
 torchaudio==2.2.0
-moviepy==1.0.3
+moviepy
 pysrt
 huggingface_hub
 python-dotenv
