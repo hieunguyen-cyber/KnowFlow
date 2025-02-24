@@ -96,6 +96,7 @@ def generate_image(prompt, output_path, style=None, color_palette=None):
     
     image = client.text_to_image(custom_prompt, model=model)
     image.save(output_path)
+    print(f"✅Image saved at {output_path}")
 def image_gen(number_of_images = 3,detail_level = "short", perspective="neutral", emotion=None, time_setting=None, art_style=None, style=None, color_palette=None):
     texts = split_text_for_images(number_of_images)
     index = 0
