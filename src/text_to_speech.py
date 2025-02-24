@@ -35,7 +35,7 @@ def generate_audio(text, filename="output.mp3", gender="female", speed="normal")
             output = model(**inputs).waveform
         
         # Lưu file âm thanh
-        torchaudio.save(filename, output, 24000)
+        torchaudio.save(filename, output, 24000, backend="sox_io")
         print(f"✅ Audio saved as {filename}")
     
     else:
