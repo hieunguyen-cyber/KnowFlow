@@ -3,6 +3,8 @@ from main import main
 import os
 import subprocess
 
+st.set_option('server.runOnSave', False)
+st.set_option('server.fileWatcherType', 'none')
 # Định nghĩa đường dẫn video đầu ra
 OUTPUT_VIDEO_PATH = "./data/output/final_output.mp4"
 OUTPUT_VIDEO_FIXED_PATH = "./data/output/final_output_fixed.mp4"
