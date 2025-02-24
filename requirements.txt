@@ -13,3 +13,4 @@ ffmpeg-python
 torchaudio 
 soundfile
 gtts
+numpy<2
