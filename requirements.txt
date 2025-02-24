@@ -1,6 +1,6 @@
 transformers
 pymupdf
-torch
+torch==2.1.0
 numpy
 torchaudio
 moviepy
