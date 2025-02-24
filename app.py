@@ -9,6 +9,13 @@ import streamlit as st
 from main import main
 import os
 import subprocess
+from huggingface_hub import InferenceClient
+import google.generativeai as genai
+
+HF_API_KEY = st.secrets["secrets"]["HUGGINGFACE_API_KEY"]
+GOOGLE_API_KEY = st.secrets["secrets"]["GOOGLE_API_KEY"]
+genai.configure(api_key=GOOGLE_API_KEY)
+client = InferenceClient(provider="hf-inference", api_key=HF_API_KEY)
 
 # Định nghĩa đường dẫn video đầu ra
 OUTPUT_VIDEO_PATH = "./data/output/final_output.mp4"
