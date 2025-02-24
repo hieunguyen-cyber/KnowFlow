@@ -12,7 +12,7 @@ import subprocess
 from huggingface_hub import InferenceClient
 import google.generativeai as genai
 
-st.write("🔑 API Key:", st.secrets["HF_TOKEN"])
+st.write("🔑 API Key:", st.secrets["secrets"]["HF_TOKEN"])
 
 HF_TOKEN = st.secrets["secrets"]["HF_TOKEN"]
 GOOGLE_API_KEY = st.secrets["secrets"]["GOOGLE_API_KEY"]
