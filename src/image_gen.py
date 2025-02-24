@@ -121,6 +121,5 @@ def image_gen(number_of_images = 3,detail_level = "short", perspective="neutral"
                 print(f"Thử lại sau {wait_time:.2f} giây...")
                 time.sleep(wait_time)
         index += 1
-    os.remove("./data/text/text.txt")
 if __name__ == "__main__":
     image_gen(number_of_images = 3, detail_level="short", perspective="neutral", emotion="sad", time_setting="classic", art_style="realistic", style="anime", color_palette="monochrome")
