@@ -10,7 +10,7 @@ import time
 from dotenv import load_dotenv
 
 load_dotenv()
-HF_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
+HF_TOKEN = os.getenv("HUGGINGFACE_API_KEY")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 genai.configure(api_key=GOOGLE_API_KEY)
 client = InferenceClient(provider="hf-inference", api_key=HF_API_KEY)

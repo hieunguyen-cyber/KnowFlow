@@ -12,7 +12,7 @@ import subprocess
 from huggingface_hub import InferenceClient
 import google.generativeai as genai
 
-HF_API_KEY = st.secrets["secrets"]["HUGGINGFACE_API_KEY"]
+HF_TOKEN = st.secrets["secrets"]["HUGGINGFACE_API_KEY"]
 GOOGLE_API_KEY = st.secrets["secrets"]["GOOGLE_API_KEY"]
 genai.configure(api_key=GOOGLE_API_KEY)
 client = InferenceClient(provider="hf-inference", api_key=HF_API_KEY)
