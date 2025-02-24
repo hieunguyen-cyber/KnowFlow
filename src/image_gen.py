@@ -13,7 +13,7 @@ load_dotenv()
 HF_TOKEN = os.getenv("HF_TOKEN")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 genai.configure(api_key=GOOGLE_API_KEY)
-client = InferenceClient(provider="fal-ai", api_key=HF_TOKEN)
+client = InferenceClient(provider="hf-inference", api_key=HF_TOKEN)
 
 def split_text_for_images(number_of_images):
     with open("./data/text/text.txt", "r", encoding="utf-8") as file:

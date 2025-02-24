@@ -15,7 +15,7 @@ import google.generativeai as genai
 HF_TOKEN = st.secrets["secrets"]["HF_TOKEN"]
 GOOGLE_API_KEY = st.secrets["secrets"]["GOOGLE_API_KEY"]
 genai.configure(api_key=GOOGLE_API_KEY)
-client = InferenceClient(provider="fal-ai", api_key=HF_TOKEN)
+client = InferenceClient(provider="hf-inference", api_key=HF_TOKEN)
 
 # Định nghĩa đường dẫn video đầu ra
 OUTPUT_VIDEO_PATH = "./data/output/final_output.mp4"
