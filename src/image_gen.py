@@ -2,7 +2,7 @@ from huggingface_hub import InferenceClient
 import os
 import glob
 from collections import defaultdict
-import google.generativeai as genai
+from google import genai
 from tqdm import tqdm
 from huggingface_hub.utils import HfHubHTTPError
 import random
@@ -12,11 +12,11 @@ from dotenv import load_dotenv
 load_dotenv()
 HF_TOKEN = os.getenv("HF_TOKEN")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-genai.configure(api_key=GOOGLE_API_KEY)
+client_gemini = genai.Client(api_key = GOOGLE_API_KEY)
 client = InferenceClient(provider="hf-inference", api_key=HF_TOKEN)
 
 def split_text_for_images(number_of_images):
-    with open("./data/text/text.txt", "r", encoding="utf-8") as file:
+    with open("text.txt", "r", encoding="utf-8") as file:
         text = file.read().strip()
 
     total_length = len(text)
@@ -70,8 +70,9 @@ def describe_image(description, detail_level="short", perspective="neutral", emo
     """
 
     try:
-        model = genai.GenerativeModel("gemini-pro")
-        response = model.generate_content(prompt)
+        response = client_gemini.models.generate_content(
+            model = "gemini-2.0-flash", contents = prompt
+        )
         return response.text.strip()
     except Exception as e:
         print(f"Lỗi khi gọi API Gemini: {e}")
@@ -101,7 +102,7 @@ def image_gen(number_of_images = 3,detail_level = "short", perspective="neutral"
     texts = split_text_for_images(number_of_images)
     index = 0
     for text in tqdm(texts, desc="Processing", unit="image"):
-        output_path = f"./data/image/{index}.png"
+        output_path = f"{index}.png"
         prompt = describe_image(text, detail_level, perspective, emotion, time_setting, art_style)
         print(prompt)
 
@@ -121,6 +122,3 @@ def image_gen(number_of_images = 3,detail_level = "short", perspective="neutral"
                 print(f"Thử lại sau {wait_time:.2f} giây...")
                 time.sleep(wait_time)
         index += 1
-    os.remove("./data/text/text.txt")
-if __name__ == "__main__":
-    image_gen(number_of_images = 3, detail_level="short", perspective="neutral", emotion="sad", time_setting="classic", art_style="realistic", style="anime", color_palette="monochrome")

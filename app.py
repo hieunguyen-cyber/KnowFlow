@@ -9,17 +9,10 @@ import streamlit as st
 from main import main
 import os
 import subprocess
-from huggingface_hub import InferenceClient
-import google.generativeai as genai
-
-HF_TOKEN = st.secrets["secrets"]["HF_TOKEN"]
-GOOGLE_API_KEY = st.secrets["secrets"]["GOOGLE_API_KEY"]
-genai.configure(api_key=GOOGLE_API_KEY)
-client = InferenceClient(provider="hf-inference", api_key=HF_TOKEN)
 
 # Định nghĩa đường dẫn video đầu ra
-OUTPUT_VIDEO_PATH = "./data/output/final_output.mp4"
-OUTPUT_VIDEO_FIXED_PATH = "./data/output/final_output_fixed.mp4"
+OUTPUT_VIDEO_PATH = "final_output.mp4"
+OUTPUT_VIDEO_FIXED_PATH = "final_output_fixed.mp4"
 
 # Tiêu đề ứng dụng
 st.set_page_config(page_title="KnowFlow", page_icon="📖")
@@ -31,14 +24,26 @@ st.markdown("---")
 st.markdown("👨‍💻 **Author:** Nguyễn Trung Hiếu")
 st.markdown("🔗 [GitHub Repository](https://github.com/hieunguyen-cyber/KnowFlow.git)")
 st.markdown("---")
+st.markdown("""
+## 🎯 Purpose  
+KnowFlow automates the process of converting lecture documents (PDF, DOCX) into narrated videos with structured explanations. It extracts text, formulas, and images, generates explanations, converts text to speech, and assembles everything into a video.  
 
+## 🛠️ How to Use  
+1️⃣ **Upload a lecture file (PDF, DOCX)**.  
+2️⃣ **Select processing options** (text extraction, summarization, TTS).  
+3️⃣ **Generate the video** – the system will process and compile it.  
+4️⃣ **Download the final video** for review or sharing.  
+
+🚀 Fully open-source and free to use! \n
+If you find it's slow, then another person must be using the GPU. Please wait!!
+""")
 # Upload file PDF
 uploaded_file = st.file_uploader("📂 Upload your document (PDF)", type=["pdf","docx"])
 
 # Nếu có file, lưu vào thư mục tạm và lấy đường dẫn
 file_path = None
 if uploaded_file:
-    file_path = f"./data/input/{uploaded_file.name}"
+    file_path = f"{uploaded_file.name}"
     with open(file_path, "wb") as f:
         f.write(uploaded_file.getbuffer())  # Lưu file thực tế
 number_of_images = st.slider("🖼️ Nhập số ảnh",1,10,3)
@@ -101,8 +106,6 @@ if st.button("🚀 Generate Video"):
             
             # Chuyển đổi định dạng âm thanh
             convert_audio_format(OUTPUT_VIDEO_PATH, OUTPUT_VIDEO_FIXED_PATH)
-
-            st.video(OUTPUT_VIDEO_FIXED_PATH)  # Trình chiếu video
 
             # Tạo link tải về
             with open(OUTPUT_VIDEO_FIXED_PATH, "rb") as video_file:

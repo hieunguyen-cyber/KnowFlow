@@ -41,12 +41,10 @@ def generate_audio(text, filename="output.mp3", gender="female", speed="normal")
     else:
         print("⚠️ Giọng không hợp lệ! Chỉ hỗ trợ 'male' hoặc 'female'.")
 def text_to_speech(gender, speed):
-    text_folder = "./data/text"
-    text_files = sorted([f for f in os.listdir(text_folder) if f.endswith('.txt') and f != "text.txt"])
+    text_folder = "./"
+    text_files = sorted([f for f in os.listdir(text_folder) if f.endswith('.txt') and f != "text.txt" and f != "requirements.txt"])
     for text_file in text_files:
-        with open(f"./data/text/{text_file}", "r", encoding="utf-8") as file:
+        with open(f"{text_file}", "r", encoding="utf-8") as file:
             content = file.read()
-        audio_file = text_file.replace("txt","wav")
-        generate_audio(content, f"./data/audio/{audio_file}", gender=gender, speed=speed) 
-if __name__ == "__main__":
-    text_to_speech(gender = "female", speed = "fast")
+        audio_file = text_file.replace("txt","mp3")
+        generate_audio(content, f"{audio_file}", gender=gender, speed=speed) 

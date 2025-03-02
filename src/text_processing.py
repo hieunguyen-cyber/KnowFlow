@@ -1,12 +1,12 @@
 import os
 import fitz  
 from docx import Document
-import google.generativeai as genai
+from google import genai
 from dotenv import load_dotenv
 
 load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-genai.configure(api_key=GOOGLE_API_KEY)
+client = genai.Client(api_key=GOOGLE_API_KEY)
 
 ####################### - TEXT EXTRACTION - #######################
 def extract_text_from_pdf(pdf_path):
@@ -15,7 +15,7 @@ def extract_text_from_pdf(pdf_path):
     text = ""
     for page_num in range(doc.page_count):
         page = doc.load_page(page_num)
-        text += page.get_text()
+        text += page.get_text() 
     return text
 
 def extract_text_from_docx(docx_path):
@@ -51,9 +51,11 @@ def split_text_by_semantics(text):
     """
 
     try:
-        model = genai.GenerativeModel("gemini-pro")
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model="gemini-2.0-flash", contents=prompt
+        )
         result_text = response.text.strip()
+        print(result_text)
 
         chunks = result_text.split("- Phần ")
         chunks = [chunk.strip() for chunk in chunks if chunk]
@@ -96,9 +98,10 @@ def generate_explaination_for_chunks(chunks, analysis_level='basic', writting_st
     """
     
     try:
-        model = genai.GenerativeModel("gemini-pro")
-        response = model.generate_content(overview_prompt)
-        overview_text = response.text.strip()
+        response = client.models.generate_content(
+            model="gemini-2.0-flash", contents=overview_prompt
+        )
+        print(response)
         
         explanations = []
         for idx, chunk in enumerate(chunks, start=1):
@@ -111,7 +114,9 @@ def generate_explaination_for_chunks(chunks, analysis_level='basic', writting_st
             Hãy đảm bảo phần tóm tắt không vượt quá {word_upper_limit} từ và không ít hơn {word_lower_limit}.
             """
             
-            part_response = model.generate_content(part_prompt)
+            part_response = response = client.models.generate_content(
+                    model="gemini-2.0-flash", contents=part_prompt
+                )
             explanations.append(part_response.text.strip())
         
         return explanations
@@ -122,7 +127,7 @@ def generate_explaination_for_chunks(chunks, analysis_level='basic', writting_st
 def text_processing(file_path, analysis_level='basic', writting_style='academic', word_lower_limit = 100, word_upper_limit = 150):
     # Trích xuất văn bản từ file PDF
     text = extract_text_from_file(file_path=file_path)
-    with open("./data/text/text.txt", "w", encoding="utf-8") as f:
+    with open("./text.txt", "w", encoding="utf-8") as f:
         f.write(text)  
     # Tách văn bản theo ngữ nghĩa
     semantic_chunks = split_text_by_semantics(text)
@@ -131,7 +136,7 @@ def text_processing(file_path, analysis_level='basic', writting_style='academic'
     explanations = generate_explaination_for_chunks(semantic_chunks, analysis_level=analysis_level, writting_style = writting_style, word_lower_limit = word_lower_limit, word_upper_limit=word_upper_limit)
 
     # Tạo thư mục nếu chưa tồn tại
-    output_dir = "./data/text/"
+    output_dir = "./"
     os.makedirs(output_dir, exist_ok=True)
 
     # Lưu từng câu vào file riêng biệt
@@ -146,6 +151,3 @@ def text_processing(file_path, analysis_level='basic', writting_style='academic'
                 with open(output_file, "w", encoding="utf-8") as f:
                     f.write(sentence.replace("*","") + ".")  # Giữ dấu chấm cuối câu
                 print(f"Đã lưu: {output_file}")
-####################### - MAIN CODE - #######################
-if __name__ == "__main__":
-    text_processing(file_path = "./data/input/sample_3.pdf")

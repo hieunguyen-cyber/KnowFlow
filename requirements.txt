@@ -8,7 +8,7 @@ huggingface_hub
 python-dotenv
 streamlit==1.42.2
 python-docx
-google-generativeai
+google-genai
 ffmpeg-python==0.2.0
 soundfile
 gtts

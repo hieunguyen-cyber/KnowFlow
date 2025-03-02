@@ -15,16 +15,16 @@ def format_time(seconds):
     hours, mins = divmod(mins, 60)
     return f"{int(hours):02}:{int(mins):02}:{int(sec):02},{int((sec % 1) * 1000):03}"
 def get_audio_duration(audio_path):
-    # Lọc các file có đuôi .wav
+    # Lọc các file có đuôi .mp3
     audio_paths = os.listdir(audio_path)
-    audio_list = [file for file in audio_paths if file.endswith(".wav")]
+    audio_list = [file for file in audio_paths if file.endswith(".mp3")]
     
     # Khởi tạo danh sách audio duration
     duration_list = []
     
     for audio_path in audio_list:
         # Mở file âm thanh và lấy thời gian
-        with AudioFileClip(f"./data/audio/{audio_path}") as audio:
+        with AudioFileClip(f"{audio_path}") as audio:
             duration_list.append(audio.duration)
     # Tính tổng tích lũy thời gian
     duration_list = [format_time(time) for time in list(accumulate(duration_list))]
@@ -32,9 +32,11 @@ def get_audio_duration(audio_path):
 def create_srt_from_time_and_text(duration_time, text_folder, output_srt):
     subtitle = ""
     subtitle_index = 1
-    text_list = sorted([file for file in os.listdir(text_folder) if file.endswith('txt')])
+    text_list = sorted([file for file in os.listdir(text_folder) if file.endswith('.txt') and file != "text.txt" and file != "requirements.txt"])
+    print(f"Accessing duration_time list: {len(text_list)} elements")
     # Duyệt qua các mốc thời gian và file text
     for i in range(len(duration_time) - 1):
+        print(f"Accessing text_list at index {i}, length of text_list: {len(text_list)}")
         start_time = duration_time[i]
         end_time = duration_time[i + 1]
         
@@ -56,11 +58,11 @@ def create_srt_from_time_and_text(duration_time, text_folder, output_srt):
     with open(output_srt, 'w', encoding='utf-8') as f:
         f.write(subtitle)
 def concatenate_audio_files(audio_folder, output_audio_path):
-    # Lọc tất cả các file âm thanh .wav trong thư mục
+    # Lọc tất cả các file âm thanh .mp3 trong thư mục
     audio_clips = []
     
     for file in sorted(os.listdir(audio_folder)):
-        if file.endswith('.wav'):
+        if file.endswith('.mp3'):
             audio_path = os.path.join(audio_folder, file)
             audio_clip = AudioFileClip(audio_path)
             audio_clips.append(audio_clip)
@@ -69,7 +71,7 @@ def concatenate_audio_files(audio_folder, output_audio_path):
     final_audio = concatenate_audioclips(audio_clips)
     
     # Lưu kết quả vào file output
-    final_audio.write_audiofile(output_audio_path, codec = 'pcm_s16le')
+    final_audio.write_audiofile(output_audio_path, codec = 'libmp3lame')
 
     print(f"File audio đã được lưu tại: {output_audio_path}")
 def create_video_from_images(image_folder, audio_path, output_video_path):
@@ -78,7 +80,7 @@ def create_video_from_images(image_folder, audio_path, output_video_path):
     total_duration = audio.duration  # Tổng thời lượng video bằng thời lượng audio
 
     # Đọc tất cả các file ảnh trong thư mục và sắp xếp theo tên
-    image_files = [file for file in sorted(os.listdir(image_folder)) if file.endswith("png")]
+    image_files = [file for file in sorted(os.listdir(image_folder)) if file.endswith(".png")]
     
     if not image_files:
         raise ValueError("Không tìm thấy ảnh nào trong thư mục!")
@@ -87,7 +89,7 @@ def create_video_from_images(image_folder, audio_path, output_video_path):
     duration_per_image = total_duration / len(image_files)
 
     # Tạo danh sách các clip ảnh
-    clips = [ImageClip(f"./data/image/{img}").with_duration(duration_per_image).resized(width=1280) for img in image_files]
+    clips = [ImageClip(f"{img}").with_duration(duration_per_image).resized(width=1280) for img in image_files]
 
     # Ghép các clip ảnh lại với nhau
     final_video = concatenate_videoclips(clips, method="chain")
@@ -96,7 +98,7 @@ def create_video_from_images(image_folder, audio_path, output_video_path):
     final_video .audio = audio
 
     # Xuất video
-    final_video.write_videofile(output_video_path, codec="libx264", audio_codec="pcm_s16le", fps=24)
+    final_video.write_videofile(output_video_path, codec="libx264", audio_codec="aac", fps=30)
 
     print(f"Video đã được lưu tại: {output_video_path}")
 def wrap_text(text, max_width):
@@ -127,7 +129,7 @@ def add_subtitles_to_video(video_path, subtitle_path, output_video_path):
         # Chuyển thời gian thành giây
         start_time = sub.start.ordinal / 1000  # Chuyển từ milliseconds sang giây
         end_time = sub.end.ordinal / 1000
-        font = "./data/BeVietnamPro-Light.ttf"
+        font = "BeVietnamPro-Light.ttf"
         # Tạo clip phụ đề
         txt_clip = TextClip(font=font, text=wrap_text(sub.text, max_width=85), font_size=30, stroke_color="black", stroke_width=3, color="#fff")
          
@@ -144,10 +146,8 @@ def add_subtitles_to_video(video_path, subtitle_path, output_video_path):
 
     print(f"Video với phụ đề đã được lưu tại: {output_video_path}")
 def text_to_video():
-    duration_time = get_audio_duration("./data/audio")
-    create_srt_from_time_and_text(duration_time, './data/text', './data/output/subtitle.srt')
-    concatenate_audio_files("./data/audio","./data/output/final_audio.wav")
-    create_video_from_images("./data/image","./data/output/final_audio.wav","./data/output/output.mp4")
-    add_subtitles_to_video("./data/output/output.mp4", "./data/output/subtitle.srt", "./data/output/final_output.mp4")
-if __name__ == "__main__":
-    text_to_video()
+    duration_time = get_audio_duration("./")
+    create_srt_from_time_and_text(duration_time, './', 'subtitle.srt')
+    concatenate_audio_files("./","final_audio.mp3")
+    create_video_from_images("./","final_audio.mp3","output.mp4")
+    add_subtitles_to_video("output.mp4", "subtitle.srt", "final_output.mp4")
