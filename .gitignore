@@ -6,7 +6,6 @@ __pycache__/
 .env
 *.txt
 .streamlit
-.vercel
 .DS_Store
 *.png
 *.srt
