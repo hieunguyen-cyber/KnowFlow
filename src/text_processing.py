@@ -4,9 +4,12 @@ from docx import Document
 from google import genai
 from dotenv import load_dotenv
 
-load_dotenv()
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-client = genai.Client(api_key=GOOGLE_API_KEY)
+def set_up_api():
+    load_dotenv()
+    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+    print(GOOGLE_API_KEY)
+    client = genai.Client(api_key=GOOGLE_API_KEY)
+    return client
 
 ####################### - TEXT EXTRACTION - #######################
 def extract_text_from_pdf(pdf_path):
@@ -37,7 +40,7 @@ def extract_text_from_file(file_path):
     else:
         raise ValueError("Unsupported file format. Only PDF and DOCX are supported.")
 ####################### - SEMANTIC CHUNKING - #######################
-def split_text_by_semantics(text):
+def split_text_by_semantics(text, client):
     prompt = f"""
     Bạn là một chuyên gia xử lý văn bản. Hãy chia văn bản sau thành một số đoạn có ý nghĩa sao cho mỗi đoạn vừa đủ để giải thích trong khoảng 3 đến 5 câu.
 
@@ -52,7 +55,7 @@ def split_text_by_semantics(text):
 
     try:
         response = client.models.generate_content(
-            model="gemini-2.0-flash", contents=prompt
+            model="gemini-2.0-flash", contents=[prompt]
         )
         result_text = response.text.strip()
         print(result_text)
@@ -65,7 +68,7 @@ def split_text_by_semantics(text):
         return []
 
 ####################### - CONTENT GENERATION - #######################
-def generate_explaination_for_chunks(chunks, analysis_level='basic', writting_style='academic', word_lower_limit=100, word_upper_limit=150):
+def generate_explaination_for_chunks(chunks, client, analysis_level='basic', writting_style='academic', word_lower_limit=100, word_upper_limit=150):
     """
     Phân tích nội dung của văn bản theo mức độ và phong cách mong muốn.
     
@@ -99,9 +102,8 @@ def generate_explaination_for_chunks(chunks, analysis_level='basic', writting_st
     
     try:
         response = client.models.generate_content(
-            model="gemini-2.0-flash", contents=overview_prompt
+            model="gemini-2.0-flash", contents=[overview_prompt]
         )
-        print(response)
         
         explanations = []
         for idx, chunk in enumerate(chunks, start=1):
@@ -114,9 +116,10 @@ def generate_explaination_for_chunks(chunks, analysis_level='basic', writting_st
             Hãy đảm bảo phần tóm tắt không vượt quá {word_upper_limit} từ và không ít hơn {word_lower_limit}.
             """
             
-            part_response = response = client.models.generate_content(
-                    model="gemini-2.0-flash", contents=part_prompt
+            part_response = client.models.generate_content(
+                    model="gemini-2.0-flash", contents=[part_prompt]
                 )
+            print(part_response.text.strip())
             explanations.append(part_response.text.strip())
         
         return explanations
@@ -125,15 +128,16 @@ def generate_explaination_for_chunks(chunks, analysis_level='basic', writting_st
         print(f"Lỗi khi gọi API Gemini: {e}")
         return [] 
 def text_processing(file_path, analysis_level='basic', writting_style='academic', word_lower_limit = 100, word_upper_limit = 150):
+    client = set_up_api()
     # Trích xuất văn bản từ file PDF
     text = extract_text_from_file(file_path=file_path)
     with open("./text.txt", "w", encoding="utf-8") as f:
         f.write(text)  
     # Tách văn bản theo ngữ nghĩa
-    semantic_chunks = split_text_by_semantics(text)
+    semantic_chunks = split_text_by_semantics(text, client)
 
     # Tạo thuyết minh cho từng phần semantic chunk
-    explanations = generate_explaination_for_chunks(semantic_chunks, analysis_level=analysis_level, writting_style = writting_style, word_lower_limit = word_lower_limit, word_upper_limit=word_upper_limit)
+    explanations = generate_explaination_for_chunks(semantic_chunks, client, analysis_level=analysis_level, writting_style = writting_style, word_lower_limit = word_lower_limit, word_upper_limit=word_upper_limit)
 
     # Tạo thư mục nếu chưa tồn tại
     output_dir = "./"
@@ -151,3 +155,5 @@ def text_processing(file_path, analysis_level='basic', writting_style='academic'
                 with open(output_file, "w", encoding="utf-8") as f:
                     f.write(sentence.replace("*","") + ".")  # Giữ dấu chấm cuối câu
                 print(f"Đã lưu: {output_file}")
+if __name__ == "__main__":
+    text_processing("phan-tich-hinh-tuong-nguoi-lai-do-song-da-2.pdf")

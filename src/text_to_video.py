@@ -8,7 +8,6 @@ import os
 from itertools import accumulate
 import pysrt
 
-
 def format_time(seconds):
     """Chuyển đổi thời gian (giây) thành định dạng SRT hh:mm:ss,ms"""
     mins, sec = divmod(seconds, 60)

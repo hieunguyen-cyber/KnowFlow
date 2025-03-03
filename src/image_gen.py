@@ -8,13 +8,13 @@ from huggingface_hub.utils import HfHubHTTPError
 import random
 import time
 from dotenv import load_dotenv
-
-load_dotenv()
-HF_TOKEN = os.getenv("HF_TOKEN")
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-client_gemini = genai.Client(api_key = GOOGLE_API_KEY)
-client = InferenceClient(provider="hf-inference", api_key=HF_TOKEN)
-
+def set_up_api():
+    load_dotenv()
+    HF_TOKEN = os.getenv("HF_TOKEN")
+    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+    client_gemini = genai.Client(api_key = GOOGLE_API_KEY)
+    client = InferenceClient(provider="hf-inference", api_key=HF_TOKEN)
+    return client_gemini, client
 def split_text_for_images(number_of_images):
     with open("text.txt", "r", encoding="utf-8") as file:
         text = file.read().strip()
@@ -39,7 +39,7 @@ def split_text_for_images(number_of_images):
         start = end  # Bắt đầu đoạn tiếp theo từ đây
 
     return chunks
-def describe_image(description, detail_level="short", perspective="neutral", emotion=None, time_setting=None, art_style=None):
+def describe_image(description, client_gemini, detail_level="short", perspective="neutral", emotion=None, time_setting=None, art_style=None):
     """
     Nhận một đoạn văn mô tả chi tiết và trả về một câu mô tả hình ảnh theo các tùy chỉnh.
 
@@ -71,13 +71,13 @@ def describe_image(description, detail_level="short", perspective="neutral", emo
 
     try:
         response = client_gemini.models.generate_content(
-            model = "gemini-2.0-flash", contents = prompt
+            model = "gemini-2.0-flash", contents = [prompt]
         )
         return response.text.strip()
     except Exception as e:
         print(f"Lỗi khi gọi API Gemini: {e}")
         return ""
-def generate_image(prompt, output_path, style=None, color_palette=None):
+def generate_image(prompt, client, output_path, style=None, color_palette=None):
     model="stabilityai/stable-diffusion-3.5-large"
     """
     Tạo hình ảnh từ mô tả văn bản với các tùy chỉnh linh hoạt.
@@ -99,11 +99,12 @@ def generate_image(prompt, output_path, style=None, color_palette=None):
     image.save(output_path)
     print(f"✅Image saved at {output_path}")
 def image_gen(number_of_images = 3,detail_level = "short", perspective="neutral", emotion=None, time_setting=None, art_style=None, style=None, color_palette=None):
+    client_gemini, client = set_up_api()
     texts = split_text_for_images(number_of_images)
     index = 0
     for text in tqdm(texts, desc="Processing", unit="image"):
         output_path = f"{index}.png"
-        prompt = describe_image(text, detail_level, perspective, emotion, time_setting, art_style)
+        prompt = describe_image(text, client_gemini, detail_level, perspective, emotion, time_setting, art_style)
         print(prompt)
 
         # Cơ chế retry với backoff
@@ -112,7 +113,7 @@ def image_gen(number_of_images = 3,detail_level = "short", perspective="neutral"
 
         while retry_count < max_retries:
             try:
-                generate_image(prompt, output_path, style, color_palette)
+                generate_image(prompt, client, output_path, style, color_palette)
                 time.sleep(60)  # Chờ sau khi tạo ảnh thành công
                 break  # Nếu thành công thì thoát khỏi vòng lặp retry
             except HfHubHTTPError as e:
