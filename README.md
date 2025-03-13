@@ -33,9 +33,6 @@ streamlit run app.py
 ```
 Sau khi chạy lệnh trên, mở trình duyệt và truy cập `http://localhost:8501` để sử dụng.
 
-## 📸 Hình ảnh minh họa
-![Demo KnowFlow](data/pipeline.png)
-
 ## 📜 Giấy phép
 Dự án được phát hành dưới giấy phép Apache.
 
