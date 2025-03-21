@@ -7,11 +7,9 @@ from tqdm import tqdm
 from huggingface_hub.utils import HfHubHTTPError
 import random
 import time
-from dotenv import load_dotenv
+import streamlit as st
 def set_up_api():
-    load_dotenv()
-    HF_TOKEN = os.getenv("HF_TOKEN")
-    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+    GOOGLE_API_KEY = st.secrets["API"]["GOOGLE_API_KEY"]
     client_gemini = genai.Client(api_key = GOOGLE_API_KEY)
     client = InferenceClient(provider="hf-inference", api_key=HF_TOKEN)
     return client_gemini, client
