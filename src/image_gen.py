@@ -9,7 +9,7 @@ import random
 import time
 import streamlit as st
 def set_up_api():
-    GOOGLE_API_KEY = st.secrets["API"]["GOOGLE_API_KEY"]
+    GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
     client_gemini = genai.Client(api_key = GOOGLE_API_KEY)
     client = InferenceClient(provider="hf-inference", api_key=HF_TOKEN)
     return client_gemini, client
