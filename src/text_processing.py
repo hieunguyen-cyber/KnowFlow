@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import streamlit as st
 
 def set_up_api():
-    GOOGLE_API_KEY = st.secrets["API"]["GOOGLE_API_KEY"]
+    GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
     print(GOOGLE_API_KEY)
     client = genai.Client(api_key=GOOGLE_API_KEY)
     return client
